@@ -210,3 +210,11 @@ footer.site .legal{border-top:1px solid rgba(255,255,255,.12);padding:16px 0;fon
 /* ad slots — collapse to nothing until a real ad loads (no empty grey box) */
 .adslot{max-width:var(--maxw);margin:0 auto;padding:0 20px}
 .adbox{display:block;width:100%;min-height:0;background:transparent;border:0;overflow:hidden}
+
+/* related guides (blog) */
+.related{margin:38px 0 10px}
+.related h2{font-size:20px;margin:0 0 14px}
+.rellist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.relcard{display:flex;align-items:center;padding:14px 16px;border:1px solid var(--line,#e6e9ef);border-radius:12px;background:#fff;text-decoration:none;color:inherit;font-weight:600;font-size:15px;line-height:1.35;transition:border-color .15s,box-shadow .15s}
+.relcard:hover{border-color:var(--brand,#0E9F8E);box-shadow:0 4px 14px rgba(14,159,142,.1)}
+.relcard span{display:block}

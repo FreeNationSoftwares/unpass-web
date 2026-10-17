@@ -22,6 +22,8 @@ header.site{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--ink)}
 .brand:hover{text-decoration:none}
 .brand .logo{width:34px;height:34px;border-radius:9px;background:var(--teal);display:grid;place-items:center;flex:none}
+.brand .logoimg{width:34px;height:34px;border-radius:9px;flex:none;object-fit:cover;display:block}
+.fbrand .logoimg{width:32px;height:32px;border-radius:8px;flex:none;object-fit:cover;display:block}
 .brand .logo svg{width:20px;height:20px}
 .nav .spacer{flex:1}
 .nav a.navlink{color:var(--sub);font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}

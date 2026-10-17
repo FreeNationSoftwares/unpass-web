@@ -17,6 +17,9 @@ const CONF = {
   compress: { accept: '.pdf', multi: false, kind: 'pdf' },
   img2pdf:  { accept: 'image/*', multi: true, kind: 'img' },
   pdf2img:  { accept: '.pdf', multi: false, kind: 'pdf' },
+  rotate:   { accept: '.pdf', multi: false, kind: 'pdf' },
+  pagenum:  { accept: '.pdf', multi: false, kind: 'pdf' },
+  watermark:{ accept: '.pdf', multi: false, kind: 'pdf' },
   imgcomp:  { accept: 'image/*', multi: false, kind: 'img' },
   resize:   { accept: 'image/*', multi: false, kind: 'img' },
 };
@@ -211,6 +214,39 @@ export function initTool(id) {
             E.download(new Uint8Array(ab), imgs[0].name, imgs[0].blob.type);
           } },
         ], thumbs);
+    }
+
+    else if (id === 'rotate') {
+      const deg = +($('.opt.sel', root)?.dataset.deg || 90);
+      busy(true, 'Rotating…');
+      const bytes = await E.readBytes(f0.file);
+      const out = await E.rotate(bytes, deg);
+      busy(false);
+      result('PDF rotated!', E.fmtSize(out.length),
+        [{ label: 'Download PDF', onClick: () => E.download(out, E.stem(f0.name) + '_rotated.pdf') }]);
+    }
+
+    else if (id === 'pagenum') {
+      const style = $('.opt.sel', root)?.dataset.style || 'n';
+      const position = $('#position')?.value || 'bottom-center';
+      busy(true, 'Adding numbers…');
+      const bytes = await E.readBytes(f0.file);
+      const out = await E.pageNumbers(bytes, { style, position });
+      busy(false);
+      result('Page numbers added!', E.fmtSize(out.length),
+        [{ label: 'Download PDF', onClick: () => E.download(out, E.stem(f0.name) + '_numbered.pdf') }]);
+    }
+
+    else if (id === 'watermark') {
+      const text = $('#wmtext').value.trim();
+      if (!text) { showErr('Please type the watermark text.'); return; }
+      const opacity = +($('.opt.sel', root)?.dataset.op || 0.2);
+      busy(true, 'Adding watermark…');
+      const bytes = await E.readBytes(f0.file);
+      const out = await E.watermark(bytes, { text, opacity });
+      busy(false);
+      result('Watermark added!', E.fmtSize(out.length),
+        [{ label: 'Download PDF', onClick: () => E.download(out, E.stem(f0.name) + '_watermark.pdf') }]);
     }
 
     else if (id === 'imgcomp') {

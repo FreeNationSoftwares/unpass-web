@@ -168,7 +168,46 @@ export async function split(bytes, spec) {
 // ROTATE every page by 90/180/270.
 export async function rotate(bytes, deg) {
   const doc = await loadDoc(bytes);
-  doc.getPages().forEach((p) => { p.setRotation(degrees((p.getRotation().angle + deg) % 360)); });
+  doc.getPages().forEach((p) => { p.setRotation(degrees(((p.getRotation().angle + deg) % 360 + 360) % 360)); });
+  return doc.save();
+}
+
+// PAGE NUMBERS: add "1", "1 / N" or "Page 1 of N" at a chosen position.
+export async function pageNumbers(bytes, { position = 'bottom-center', style = 'n', start = 1 } = {}) {
+  const doc = await loadDoc(bytes);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const pages = doc.getPages();
+  const total = pages.length;
+  const size = 11, margin = 24;
+  pages.forEach((p, i) => {
+    const n = start + i;
+    const label = style === 'n_of' ? `${n} / ${total}` : style === 'page_n_of' ? `Page ${n} of ${total}` : `${n}`;
+    const w = font.widthOfTextAtSize(label, size);
+    const pw = p.getWidth();
+    let x = (pw - w) / 2;
+    if (position.endsWith('right')) x = pw - w - margin;
+    else if (position.endsWith('left')) x = margin;
+    const y = position.startsWith('top') ? p.getHeight() - margin - size : margin;
+    p.drawText(label, { x, y, size, font, color: rgb(0.25, 0.25, 0.25) });
+  });
+  return doc.save();
+}
+
+// WATERMARK: draw a diagonal repeated text across every page.
+export async function watermark(bytes, { text = 'CONFIDENTIAL', opacity = 0.2, size = 48 } = {}) {
+  if (!text.trim()) throw new ToolError('NEED_TEXT', 'Type the watermark text.');
+  const doc = await loadDoc(bytes);
+  const font = await doc.embedFont(StandardFonts.HelveticaBold);
+  doc.getPages().forEach((p) => {
+    const { width, height } = p.getSize();
+    const tw = font.widthOfTextAtSize(text, size);
+    p.drawText(text, {
+      x: width / 2 - tw / 2 * Math.cos(Math.PI / 4) - size / 2,
+      y: height / 2 - tw / 2 * Math.sin(Math.PI / 4),
+      size, font, color: rgb(0.5, 0.5, 0.55),
+      rotate: degrees(45), opacity,
+    });
+  });
   return doc.save();
 }
 
@@ -289,5 +328,6 @@ export const friendly = (code) => ({
   NEED_MORE: 'Please add at least 2 PDF files.',
   BAD_PAGES: 'Please check the page numbers. Example: 1-3, 5, 8',
   BAD_IMAGE: 'This image is not supported. Try a JPG or PNG.',
+  NEED_TEXT: 'Please type the text first.',
   READ: 'Could not read the file. Please try again.',
 }[code] || 'Something went wrong. Please try another file.');

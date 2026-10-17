@@ -22,6 +22,7 @@ const CONF = {
   watermark:{ accept: '.pdf', multi: false, kind: 'pdf' },
   imgcomp:  { accept: 'image/*', multi: false, kind: 'img' },
   resize:   { accept: 'image/*', multi: false, kind: 'img' },
+  convert:  { accept: 'image/*', multi: false, kind: 'img' },
 };
 
 export function initTool(id) {
@@ -247,6 +248,21 @@ export function initTool(id) {
       busy(false);
       result('Watermark added!', E.fmtSize(out.length),
         [{ label: 'Download PDF', onClick: () => E.download(out, E.stem(f0.name) + '_watermark.pdf') }]);
+    }
+
+    else if (id === 'convert') {
+      const fmt = $('#fmt')?.value || 'jpeg';
+      busy(true, 'Converting…');
+      const { blob, width, height } = await E.convertImage(f0.file, { format: fmt });
+      busy(false);
+      const ext = fmt === 'png' ? 'png' : fmt === 'webp' ? 'webp' : 'jpg';
+      const url = URL.createObjectURL(blob);
+      result('Converted to ' + ext.toUpperCase() + '!', `${width}×${height} px · ${E.fmtSize(blob.size)}`,
+        [{ label: 'Download ' + ext.toUpperCase(), onClick: async () => {
+          const ab = await blob.arrayBuffer();
+          E.download(new Uint8Array(ab), E.stem(f0.name) + '.' + ext, blob.type);
+        } }],
+        `<img src="${url}" style="max-height:200px;border-radius:10px;margin:6px auto;display:block">`);
     }
 
     else if (id === 'imgcomp') {

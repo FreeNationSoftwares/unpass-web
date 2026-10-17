@@ -320,6 +320,23 @@ export async function processImage(file, { width = 0, height = 0, maxKB = 0, min
   return { blob: best, width: tw, height: th };
 }
 
+// CONVERT one image to JPG / PNG / WebP. Returns {blob, width, height, format}.
+export async function convertImage(file, { format = 'jpeg', quality = 0.92 } = {}) {
+  let bmp;
+  try { bmp = await createImageBitmap(file); }
+  catch { throw new ToolError('BAD_IMAGE', 'This image could not be read. Try a JPG, PNG or WebP.'); }
+  const canvas = document.createElement('canvas');
+  canvas.width = bmp.width; canvas.height = bmp.height;
+  const ctx = canvas.getContext('2d');
+  if (format === 'jpeg') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); } // flatten transparency
+  ctx.drawImage(bmp, 0, 0);
+  bmp.close && bmp.close();
+  const type = format === 'png' ? 'image/png' : format === 'webp' ? 'image/webp' : 'image/jpeg';
+  const blob = await new Promise((res) => canvas.toBlob(res, type, quality));
+  if (!blob) throw new ToolError('BAD_IMAGE', 'Could not convert this image.');
+  return { blob, width: canvas.width, height: canvas.height, format };
+}
+
 export const friendly = (code) => ({
   WRONG_PASSWORD: 'Wrong password. Please check and try again.',
   NEED_PASSWORD: 'This PDF needs a password. Type it above.',

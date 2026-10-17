@@ -36,25 +36,30 @@ header.site{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);
 }
 
 /* hero */
-.hero{text-align:center;padding:54px 0 32px}
-.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
-.hero p{font-size:clamp(15px,2.4vw,19px);color:var(--sub);max-width:620px;margin:0 auto}
-.hero .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.hero{text-align:center;padding:48px 0 28px}
+@media(max-width:620px){.hero{padding:28px 0 16px}}
+.hero h1{font-size:clamp(26px,6vw,44px);line-height:1.12;margin:0 0 12px;letter-spacing:-.02em}
+.hero p{font-size:clamp(14.5px,2.4vw,19px);color:var(--sub);max-width:620px;margin:0 auto}
+.hero .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13px;color:var(--sub);font-weight:600}
 .chip b{color:var(--teal-d)}
 
-/* tool grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin:10px 0 50px}
+/* tool grid — 2 cols on phones, 3 on tablet, 4 on desktop */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:10px 0 36px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);gap:16px}}
+@media(min-width:920px){.grid{grid-template-columns:repeat(4,1fr)}}
 .tool{display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:20px;transition:.15s;box-shadow:var(--shadow)}
+  padding:15px;transition:.15s;box-shadow:var(--shadow)}
+.tool:active{transform:scale(.98)}
 .tool:hover{transform:translateY(-3px);border-color:var(--teal);text-decoration:none}
-.tool .ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;margin-bottom:12px}
-.tool .ic svg{width:24px;height:24px}
-.tool h3{margin:0 0 4px;font-size:16px;color:var(--ink)}
-.tool p{margin:0;font-size:13px;color:var(--sub)}
-.sec-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--ink);
-  margin:26px 0 4px;text-transform:uppercase;letter-spacing:.04em}
-.sec-title .bar{width:4px;height:18px;border-radius:3px;background:var(--teal)}
+.tool .ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;margin-bottom:10px}
+.tool .ic svg{width:22px;height:22px}
+.tool h3{margin:0 0 3px;font-size:14.5px;color:var(--ink);line-height:1.2}
+.tool p{margin:0;font-size:12px;color:var(--sub);line-height:1.3}
+@media(max-width:400px){.tool{padding:13px}.tool h3{font-size:13.5px}.tool p{font-size:11.5px}}
+.sec-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--ink);
+  margin:24px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.sec-title .bar{width:4px;height:17px;border-radius:3px;background:var(--teal)}
 
 /* tool page */
 .toolpage{max-width:760px;margin:0 auto;padding:30px 20px 60px}
@@ -66,7 +71,8 @@ header.site{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);
 .toolhead p{color:var(--sub);margin:0;font-size:15px}
 
 .drop{background:var(--card);border:2px dashed var(--line);border-radius:var(--radius);
-  padding:40px 22px;text-align:center;cursor:pointer;transition:.15s}
+  padding:36px 20px;text-align:center;cursor:pointer;transition:.15s}
+@media(max-width:620px){.drop{padding:28px 16px}.toolpage{padding:20px 16px 50px}}
 .drop.hover,.drop:hover{border-color:var(--teal);background:var(--teal-l)}
 .drop .di{width:62px;height:62px;border-radius:50%;background:var(--teal-l);display:grid;place-items:center;margin:0 auto 14px}
 .drop.filled{border-style:solid;border-color:var(--teal)}
@@ -143,7 +149,6 @@ footer.site .fbrand .logo svg{width:19px;height:19px}
 footer.site .legal{border-top:1px solid rgba(255,255,255,.12);padding:16px 0;font-size:13px;color:#8fa6a1;text-align:center}
 @media(max-width:720px){footer.site .cols{grid-template-columns:1fr 1fr;gap:20px}}
 
-/* ad slots */
-.adslot{max-width:var(--maxw);margin:10px auto;padding:0 20px;min-height:0}
-.adbox{background:#eef3f2;border:1px dashed #cdd9d6;border-radius:12px;color:#8aa09b;
-  text-align:center;font-size:12px;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* ad slots — collapse to nothing until a real ad loads (no empty grey box) */
+.adslot{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+.adbox{display:block;width:100%;min-height:0;background:transparent;border:0;overflow:hidden}

@@ -1,17 +1,27 @@
 // Unpass web engine — all PDF/image work happens in the browser. Nothing is uploaded.
-// Libraries: pdf-lib (build/merge/split/images→pdf) and pdf.js (open, decrypt, rasterize).
-import {
-  PDFDocument, degrees, rgb, StandardFonts,
-} from '../lib/pdf-lib.mjs';
-import * as pdfjsLib from '../lib/pdf.mjs';
+// The PDF libraries (pdf-lib ~520KB, pdf.js ~512KB) are loaded LAZILY, only when a PDF
+// tool actually runs. Image-only tools (compress/resize/convert) load none of that, so
+// they stay very fast.
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('../lib/pdf.worker.mjs', import.meta.url).href;
 const PDFJS_OPTS = {
   cMapUrl: new URL('../lib/pdfjs/cmaps/', import.meta.url).href,
   cMapPacked: true,
   standardFontDataUrl: new URL('../lib/pdfjs/standard_fonts/', import.meta.url).href,
   wasmUrl: new URL('../lib/pdfjs/wasm/', import.meta.url).href,
 };
+
+let _pdflib = null, _pdfjs = null;
+async function pdflib() {
+  if (!_pdflib) _pdflib = await import('../lib/pdf-lib.mjs');
+  return _pdflib;
+}
+async function getPdfjs() {
+  if (!_pdfjs) {
+    _pdfjs = await import('../lib/pdf.mjs');
+    _pdfjs.GlobalWorkerOptions.workerSrc = new URL('../lib/pdf.worker.mjs', import.meta.url).href;
+  }
+  return _pdfjs;
+}
 
 export class ToolError extends Error {
   constructor(code, msg) { super(msg || code); this.code = code; }
@@ -67,8 +77,9 @@ export function parsePages(spec, total) {
   return out;
 }
 
-// ---------------------------------------------------------------- pdf-lib loaders
+// ---------------------------------------------------------------- pdf-lib / pdf.js helpers
 async function loadDoc(bytes) {
+  const { PDFDocument } = await pdflib();
   try {
     return await PDFDocument.load(bytes, { ignoreEncryption: false, updateMetadata: false });
   } catch (e) {
@@ -83,6 +94,7 @@ async function closePdfjs(doc) {
 }
 
 async function openPdfjs(bytes, password) {
+  const pdfjsLib = await getPdfjs();
   try {
     return await pdfjsLib.getDocument({ data: bytes, password, ...PDFJS_OPTS }).promise;
   } catch (e) {
@@ -114,6 +126,7 @@ const canvasJpeg = (canvas, quality) => new Promise((res) =>
 
 // Detect whether a PDF needs a password. Returns 'locked' | 'ok'.
 export async function probe(bytes) {
+  const pdfjsLib = await getPdfjs();
   try {
     const doc = await pdfjsLib.getDocument({ data: bytes.slice(), ...PDFJS_OPTS }).promise;
     await closePdfjs(doc);
@@ -126,6 +139,7 @@ export async function probe(bytes) {
 
 // UNLOCK: open with password, rebuild a clean PDF (one rasterized page each, high quality).
 export async function unlock(bytes, password, { dpi = 150, onProgress } = {}) {
+  const { PDFDocument } = await pdflib();
   const src = await openPdfjs(bytes, password);
   const scale = dpi / 72;
   const out = await PDFDocument.create();
@@ -145,6 +159,7 @@ export async function unlock(bytes, password, { dpi = 150, onProgress } = {}) {
 // MERGE: combine PDFs in order. Any locked file throws PDF_LOCKED.
 export async function merge(files, { onProgress } = {}) {
   if (files.length < 2) throw new ToolError('NEED_MORE', 'Add at least 2 PDFs.');
+  const { PDFDocument } = await pdflib();
   const out = await PDFDocument.create();
   for (let i = 0; i < files.length; i++) {
     const doc = await loadDoc(files[i]);
@@ -157,6 +172,7 @@ export async function merge(files, { onProgress } = {}) {
 
 // SPLIT: keep only the given pages (spec string) in order.
 export async function split(bytes, spec) {
+  const { PDFDocument } = await pdflib();
   const doc = await loadDoc(bytes);
   const idx = parsePages(spec, doc.getPageCount());
   const out = await PDFDocument.create();
@@ -167,6 +183,7 @@ export async function split(bytes, spec) {
 
 // ROTATE every page by 90/180/270.
 export async function rotate(bytes, deg) {
+  const { degrees } = await pdflib();
   const doc = await loadDoc(bytes);
   doc.getPages().forEach((p) => { p.setRotation(degrees(((p.getRotation().angle + deg) % 360 + 360) % 360)); });
   return doc.save();
@@ -174,6 +191,7 @@ export async function rotate(bytes, deg) {
 
 // PAGE NUMBERS: add "1", "1 / N" or "Page 1 of N" at a chosen position.
 export async function pageNumbers(bytes, { position = 'bottom-center', style = 'n', start = 1 } = {}) {
+  const { StandardFonts, rgb } = await pdflib();
   const doc = await loadDoc(bytes);
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const pages = doc.getPages();
@@ -193,9 +211,10 @@ export async function pageNumbers(bytes, { position = 'bottom-center', style = '
   return doc.save();
 }
 
-// WATERMARK: draw a diagonal repeated text across every page.
+// WATERMARK: draw a diagonal text across every page.
 export async function watermark(bytes, { text = 'CONFIDENTIAL', opacity = 0.2, size = 48 } = {}) {
   if (!text.trim()) throw new ToolError('NEED_TEXT', 'Type the watermark text.');
+  const { StandardFonts, rgb, degrees } = await pdflib();
   const doc = await loadDoc(bytes);
   const font = await doc.embedFont(StandardFonts.HelveticaBold);
   doc.getPages().forEach((p) => {
@@ -213,6 +232,7 @@ export async function watermark(bytes, { text = 'CONFIDENTIAL', opacity = 0.2, s
 
 // COMPRESS: rasterize each page to JPEG at a quality level, rebuild. Returns {bytes, before, after}.
 export async function compress(bytes, { quality = 0.6, dpi = 120, onProgress } = {}) {
+  const { PDFDocument } = await pdflib();
   const src = await openPdfjs(bytes.slice());
   const scale = dpi / 72;
   const out = await PDFDocument.create();
@@ -235,6 +255,7 @@ export async function compress(bytes, { quality = 0.6, dpi = 120, onProgress } =
 
 // IMAGES → PDF. mode 'a4' fits each image on an A4 page (portrait), 'fit' makes the page the image size.
 export async function imagesToPdf(imageFiles, { mode = 'a4', onProgress } = {}) {
+  const { PDFDocument } = await pdflib();
   const out = await PDFDocument.create();
   const A4 = [595.28, 841.89];
   for (let i = 0; i < imageFiles.length; i++) {
@@ -300,20 +321,15 @@ export async function processImage(file, { width = 0, height = 0, maxKB = 0, min
     const blob = await toBlob(0.9);
     return { blob, width: tw, height: th };
   }
-  // binary-search JPEG quality to land under maxKB (and above minKB when set)
   let lo = 0.05, hi = 0.95, best = await toBlob(hi);
   if (best.size <= maxKB * 1024) {
-    // already small enough; if minKB set and too small, that's fine for photos
     return { blob: best, width: tw, height: th };
   }
   for (let i = 0; i < 9; i++) {
     const mid = (lo + hi) / 2;
     const blob = await toBlob(mid);
     if (blob.size > maxKB * 1024) { hi = mid; }
-    else {
-      best = blob; lo = mid;
-      if (minKB && blob.size < minKB * 1024) { lo = mid; } else { lo = mid; }
-    }
+    else { best = blob; lo = mid; }
   }
   best = await toBlob(lo);
   if (best.size > maxKB * 1024) best = await toBlob(0.05);

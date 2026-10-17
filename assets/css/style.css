@@ -150,12 +150,11 @@ header.site{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);
   background:var(--teal-l);border:1px solid #bfe6df;border-radius:14px;padding:14px 16px;margin:22px 0 0}
 .appcta span{font-size:14px;font-weight:600;color:var(--teal-d)}
 
-/* exam quick-link chips */
-.examchips{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 36px}
-.examchip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;
-  font-weight:700;font-size:14px;color:var(--ink);box-shadow:var(--shadow);transition:.15s}
-.examchip:hover{border-color:var(--teal);color:var(--teal-d);text-decoration:none;transform:translateY(-2px)}
-@media(max-width:400px){.examchip{font-size:13px;padding:11px 13px}}
+/* exam quick-link chips — compact pills */
+.examchips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 32px}
+.examchip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;
+  font-weight:700;font-size:13.5px;color:var(--teal-d);transition:.15s}
+.examchip:hover{border-color:var(--teal);background:var(--teal-l);text-decoration:none}
 
 /* requirements table */
 .reqtable{width:100%;border-collapse:collapse;margin:8px 0 10px;font-size:14px}

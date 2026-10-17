@@ -127,6 +127,29 @@ header.site{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);
 .privacy{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--sub);font-size:13px;margin-top:26px}
 .privacy svg{width:16px;height:16px}
 
+/* app promo banner (homepage) */
+.appcard{background:linear-gradient(135deg,var(--teal),var(--teal-d));border-radius:22px;
+  padding:26px 24px;margin:8px 0 40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;color:#fff;
+  box-shadow:0 10px 30px rgba(14,159,142,.25)}
+.appcard .appicon{width:66px;height:66px;border-radius:16px;background:rgba(255,255,255,.15);
+  display:grid;place-items:center;flex:none}
+.appcard .appicon svg{width:36px;height:36px;color:#fff}
+.appcard .apptext{flex:1;min-width:200px}
+.appcard h3{margin:0 0 4px;font-size:20px;color:#fff}
+.appcard p{margin:0;font-size:14px;color:rgba(255,255,255,.9)}
+.playbtn{display:inline-flex;align-items:center;gap:10px;background:#0d231f;color:#fff;
+  border-radius:12px;padding:11px 18px;font-weight:600;white-space:nowrap}
+.playbtn:hover{background:#071713;text-decoration:none;color:#fff}
+.playbtn svg{width:24px;height:24px;flex:none}
+.playbtn small{display:block;font-size:10px;font-weight:500;opacity:.8;line-height:1}
+.playbtn b{font-size:16px;line-height:1.1}
+@media(max-width:520px){.appcard{flex-direction:column;text-align:center}.appcard .apptext{min-width:0}}
+
+/* compact app CTA (tool pages) */
+.appcta{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+  background:var(--teal-l);border:1px solid #bfe6df;border-radius:14px;padding:14px 16px;margin:22px 0 0}
+.appcta span{font-size:14px;font-weight:600;color:var(--teal-d)}
+
 /* exam quick-link chips */
 .examchips{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 36px}
 .examchip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;

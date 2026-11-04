@@ -353,6 +353,41 @@ export async function convertImage(file, { format = 'jpeg', quality = 0.92 } = {
   return { blob, width: canvas.width, height: canvas.height, format };
 }
 
+// EXTRACT TEXT: pull selectable text from each page. Returns {text, pages, empty}.
+export async function extractText(bytes, { onProgress } = {}) {
+  const src = await openPdfjs(bytes.slice());
+  const n = src.numPages;
+  const parts = [];
+  let any = false;
+  for (let i = 1; i <= n; i++) {
+    const page = await src.getPage(i);
+    const content = await page.getTextContent();
+    let t = '';
+    for (const it of content.items) { t += it.str; if (it.hasEOL) t += '\n'; }
+    t = t.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    if (t) any = true;
+    parts.push(`--- Page ${i} ---\n${t}`);
+    if (onProgress) onProgress(i, n);
+  }
+  await closePdfjs(src);
+  return { text: parts.join('\n\n'), pages: n, empty: !any };
+}
+
+// DELETE PAGES: remove the given pages (spec), keep the rest in original order.
+export async function deletePages(bytes, spec) {
+  const { PDFDocument } = await pdflib();
+  const doc = await loadDoc(bytes);
+  const total = doc.getPageCount();
+  const remove = new Set(parsePages(spec, total));
+  const keep = [];
+  for (let i = 0; i < total; i++) if (!remove.has(i)) keep.push(i);
+  if (!keep.length) throw new ToolError('ALL_PAGES', 'You cannot delete every page.');
+  const out = await PDFDocument.create();
+  const pages = await out.copyPages(doc, keep);
+  pages.forEach((p) => out.addPage(p));
+  return { bytes: await out.save(), kept: keep.length, removed: total - keep.length };
+}
+
 export const friendly = (code) => ({
   WRONG_PASSWORD: 'Wrong password. Please check and try again.',
   NEED_PASSWORD: 'This PDF needs a password. Type it above.',
@@ -362,5 +397,6 @@ export const friendly = (code) => ({
   BAD_PAGES: 'Please check the page numbers. Example: 1-3, 5, 8',
   BAD_IMAGE: 'This image is not supported. Try a JPG or PNG.',
   NEED_TEXT: 'Please type the text first.',
+  ALL_PAGES: 'You cannot delete every page — keep at least one.',
   READ: 'Could not read the file. Please try again.',
 }[code] || 'Something went wrong. Please try another file.');

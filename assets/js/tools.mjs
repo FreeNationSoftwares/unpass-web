@@ -23,6 +23,8 @@ const CONF = {
   imgcomp:  { accept: 'image/*', multi: false, kind: 'img' },
   resize:   { accept: 'image/*', multi: false, kind: 'img' },
   convert:  { accept: 'image/*', multi: false, kind: 'img' },
+  pdf2txt:  { accept: '.pdf', multi: false, kind: 'pdf' },
+  delpages: { accept: '.pdf', multi: false, kind: 'pdf' },
 };
 
 export function initTool(id) {
@@ -90,8 +92,8 @@ export function initTool(id) {
     const dd = $('.dyn', root); // dynamic hint (page count etc.)
     if (dd) dd.textContent = '';
     runBtn.disabled = state.files.length === 0;
-    // probe page count for split
-    if (id === 'split' && state.files.length) probeSplit();
+    // probe page count for split / delete-pages
+    if ((id === 'split' || id === 'delpages') && state.files.length) probeSplit();
   }
 
   async function probeSplit() {
@@ -289,6 +291,33 @@ export function initTool(id) {
       result('Photo ready!', `${width}×${height} px · ${E.fmtSize(blob.size)}`,
         [{ label: 'Download JPG', onClick: () => blob.arrayBuffer().then((ab) => E.download(new Uint8Array(ab), E.stem(f0.name) + '_resized.jpg', 'image/jpeg')) }],
         `<img src="${url}" style="max-height:200px;border-radius:10px;margin:6px auto;display:block">`);
+    }
+
+    else if (id === 'delpages') {
+      const spec = $('#pages').value.trim();
+      if (!spec) { showErr('Type which pages to delete, e.g. 2, 5-7'); return; }
+      busy(true, 'Removing pages…');
+      const bytes = await E.readBytes(f0.file);
+      const { bytes: out, kept, removed } = await E.deletePages(bytes, spec);
+      busy(false);
+      result('Pages removed!', `${removed} removed · ${kept} kept · ${E.fmtSize(out.length)}`,
+        [{ label: 'Download PDF', onClick: () => E.download(out, E.stem(f0.name) + '_edited.pdf') }]);
+    }
+
+    else if (id === 'pdf2txt') {
+      busy(true, 'Extracting text…');
+      const bytes = await E.readBytes(f0.file);
+      const { text, pages, empty } = await E.extractText(bytes, { onProgress });
+      busy(false);
+      if (empty) { showErr('No selectable text found — this PDF looks scanned (images). Text extraction needs a text-based PDF.'); return; }
+      const preview = text.length > 1200 ? text.slice(0, 1200) + '…' : text;
+      const esc = preview.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+      result('Text extracted!', `${pages} page(s) · ${text.length.toLocaleString()} characters`,
+        [
+          { label: 'Download .txt', onClick: () => E.download(new TextEncoder().encode(text), E.stem(f0.name) + '.txt', 'text/plain') },
+          { label: 'Copy text', sec: true, onClick: () => { if (navigator.clipboard) navigator.clipboard.writeText(text); } },
+        ],
+        `<pre class="txtprev">${esc}</pre>`);
     }
   }
 

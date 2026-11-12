@@ -433,6 +433,15 @@ export async function signPdf(bytes, png, pages, box) {
   return doc.save();
 }
 
+// ---------------------------------------------------------------- PROTECT PDF (AES-128)
+export async function protect(bytes, password) {
+  if (!password) throw new ToolError('NEED_PASSWORD_SET', 'Type a password.');
+  const lib = await pdflib();
+  const doc = await loadDoc(bytes);
+  const { encryptPdf } = await import('./protect.mjs');
+  return encryptPdf(doc, lib, password);
+}
+
 export const friendly = (code) => ({
   WRONG_PASSWORD: 'Wrong password. Please check and try again.',
   NEED_PASSWORD: 'This PDF needs a password. Type it above.',
@@ -444,5 +453,7 @@ export const friendly = (code) => ({
   NEED_TEXT: 'Please type the text first.',
   ALL_PAGES: 'You cannot delete every page — keep at least one.',
   READ: 'Could not read the file. Please try again.',
+  NEED_PASSWORD_SET: 'Please type a password to protect the PDF.',
+  PW_MISMATCH: 'The two passwords do not match.',
   NO_SIGNATURE: 'Please draw or upload your signature first.',
 }[code] || 'Something went wrong. Please try another file.');

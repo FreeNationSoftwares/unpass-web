@@ -25,6 +25,7 @@ const CONF = {
   convert:  { accept: 'image/*', multi: false, kind: 'img' },
   pdf2txt:  { accept: '.pdf', multi: false, kind: 'pdf' },
   delpages: { accept: '.pdf', multi: false, kind: 'pdf' },
+  protect:  { accept: '.pdf', multi: false, kind: 'pdf' },
 };
 
 export function initTool(id) {
@@ -302,6 +303,19 @@ export function initTool(id) {
       busy(false);
       result('Pages removed!', `${removed} removed · ${kept} kept · ${E.fmtSize(out.length)}`,
         [{ label: 'Download PDF', onClick: () => E.download(out, E.stem(f0.name) + '_edited.pdf') }]);
+    }
+
+    else if (id === 'protect') {
+      const pw = $('#pw').value, pw2 = $('#pw2').value;
+      if (!pw) { showErr(E.friendly('NEED_PASSWORD_SET')); return; }
+      if (pw !== pw2) { showErr(E.friendly('PW_MISMATCH')); return; }
+      busy(true, 'Protecting…');
+      const bytes = await E.readBytes(f0.file);
+      const out = await E.protect(bytes, pw);
+      busy(false);
+      result('PDF protected!', `AES-128 encrypted · ${E.fmtSize(out.length)}`,
+        [{ label: 'Download PDF', onClick: () => E.download(out, E.stem(f0.name) + '_protected.pdf') }],
+        '<div class="meta" style="margin-top:-6px">Keep your password safe — it cannot be recovered.</div>');
     }
 
     else if (id === 'pdf2txt') {

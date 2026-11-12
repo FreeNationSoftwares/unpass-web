@@ -252,3 +252,4 @@ footer.site .legal{border-top:1px solid rgba(255,255,255,.12);padding:16px 0;fon
 .sigimg:active{cursor:grabbing}
 .sizerow{display:flex;align-items:center;gap:12px;margin-top:12px;font-weight:700;font-size:14px}
 .sizerow input{flex:1;accent-color:var(--teal)}
+.btn svg{width:18px;height:18px;flex:none}

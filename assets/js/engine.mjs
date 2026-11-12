@@ -388,6 +388,51 @@ export async function deletePages(bytes, spec) {
   return { bytes: await out.save(), kept: keep.length, removed: total - keep.length };
 }
 
+// ---------------------------------------------------------------- SIGN PDF
+// Preview helper: keeps one pdf.js document open while the user places a signature.
+export async function openPreview(bytes) {
+  const doc = await openPdfjs(bytes.slice());
+  return {
+    count: doc.numPages,
+    async render(n, cssWidth) {
+      const page = await doc.getPage(n);
+      const vp1 = page.getViewport({ scale: 1 });
+      const ratio = Math.min(2, window.devicePixelRatio || 1);
+      const canvas = await renderPage(page, (cssWidth / vp1.width) * ratio);
+      canvas.style.width = '100%';
+      return canvas;
+    },
+    close: () => closePdfjs(doc),
+  };
+}
+
+// box = {x, y, w, aspect (img h/w)} as fractions (0-1) of the page AS SHOWN (rotation applied), from top-left.
+// pages = 0-based page indexes to sign.
+export async function signPdf(bytes, png, pages, box) {
+  const { degrees } = await pdflib();
+  const doc = await loadDoc(bytes);
+  const img = await doc.embedPng(png);
+  const all = doc.getPages();
+  for (const i of pages) {
+    const p = all[i];
+    if (!p) continue;
+    const cb = p.getCropBox();
+    const W = cb.width, H = cb.height, ox = cb.x, oy = cb.y;
+    const rot = ((p.getRotation().angle % 360) + 360) % 360;
+    // shown size of this page (rotation applied) -> signature height keeps its shape
+    const dW = rot % 180 ? H : W, dH = rot % 180 ? W : H;
+    const fw = box.w, fh = box.aspect ? fw * box.aspect * dW / dH : box.h;
+    const fx = Math.min(Math.max(0, box.x), 1 - fw), fy = Math.min(Math.max(0, box.y), Math.max(0, 1 - fh));
+    let o;
+    if (rot === 90) o = { x: (fy + fh) * W, y: fx * H, width: fw * H, height: fh * W, r: 90 };
+    else if (rot === 180) o = { x: (1 - fx) * W, y: (fy + fh) * H, width: fw * W, height: fh * H, r: 180 };
+    else if (rot === 270) o = { x: (1 - fy - fh) * W, y: (1 - fx) * H, width: fw * H, height: fh * W, r: 270 };
+    else o = { x: fx * W, y: (1 - fy - fh) * H, width: fw * W, height: fh * H, r: 0 };
+    p.drawImage(img, { x: ox + o.x, y: oy + o.y, width: o.width, height: o.height, rotate: degrees(o.r) });
+  }
+  return doc.save();
+}
+
 export const friendly = (code) => ({
   WRONG_PASSWORD: 'Wrong password. Please check and try again.',
   NEED_PASSWORD: 'This PDF needs a password. Type it above.',
@@ -399,4 +444,5 @@ export const friendly = (code) => ({
   NEED_TEXT: 'Please type the text first.',
   ALL_PAGES: 'You cannot delete every page — keep at least one.',
   READ: 'Could not read the file. Please try again.',
+  NO_SIGNATURE: 'Please draw or upload your signature first.',
 }[code] || 'Something went wrong. Please try another file.');

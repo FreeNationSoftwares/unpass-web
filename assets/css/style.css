@@ -228,3 +228,27 @@ footer.site .legal{border-top:1px solid rgba(255,255,255,.12);padding:16px 0;fon
 /* homepage hero app CTA */
 .herocta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}
 .herocta-note{font-size:14px;color:var(--sub,#667085)}
+/* Sign PDF */
+.stabs{display:flex;gap:8px;margin-bottom:10px}
+.stab{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;color:var(--sub)}
+.stab.sel{border:2px solid var(--teal);background:var(--teal-l);color:var(--teal-d)}
+.sigpad{display:block;width:100%;aspect-ratio:2.78/1;background:#fff;border:2px dashed var(--line);border-radius:14px;touch-action:none;cursor:crosshair}
+.padbar{display:flex;align-items:center;gap:10px;margin-top:8px}
+.padhint{flex:1;color:var(--sub);font-size:13px}
+.swatch{width:26px;height:26px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.swatch.sel{box-shadow:0 0 0 2px var(--teal)}
+.linkbtn{border:0;background:none;color:var(--teal-d);font:inherit;font-weight:700;cursor:pointer;padding:4px 6px}
+.upbtn{display:block;text-align:center;border:2px dashed var(--line);border-radius:14px;padding:22px;background:#fff;font-weight:700;color:var(--teal-d);cursor:pointer}
+.upbtn:hover{border-color:var(--teal);background:var(--teal-l)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px;font-weight:600;cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--teal)}
+.pgnav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px;font-weight:700;font-size:14px}
+.pgnav button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:20px;cursor:pointer;color:var(--ink)}
+.pgnav button:disabled{opacity:.35;cursor:default}
+.stagewrap{background:#e9efee;border-radius:14px;padding:10px}
+.stage{position:relative;max-width:700px;margin:0 auto;box-shadow:0 2px 10px rgba(0,0,0,.12);background:#fff;line-height:0}
+.stage canvas{display:block;width:100%;height:auto}
+.sigimg{position:absolute;display:none;cursor:grab;touch-action:none;outline:2px dashed var(--teal);outline-offset:2px;user-select:none;-webkit-user-drag:none}
+.sigimg:active{cursor:grabbing}
+.sizerow{display:flex;align-items:center;gap:12px;margin-top:12px;font-weight:700;font-size:14px}
+.sizerow input{flex:1;accent-color:var(--teal)}

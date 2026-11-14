@@ -294,3 +294,6 @@ dict(
 
 from posts_data7 import POSTS7
 POSTS += POSTS7
+
+from posts_data8 import POSTS8
+POSTS += POSTS8

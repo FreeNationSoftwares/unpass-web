@@ -124,7 +124,7 @@ dict(
         ("Print the new copy", "Open it and print normally")],
  tip="Only remove protection from documents that belong to you or that you have permission to use.",
  sections=[("Two kinds of PDF protection", "<p>An <b>open password</b> stops anyone from viewing the file without it. A <b>permissions password</b> lets you view the file but blocks printing, copying or editing. Unpass needs you to know the open password, but you do not need the permissions password to make a printable copy of a file you can already open.</p>"),
-           ("Common passwords for statements", "<p>Banks and services often use a mix of your name and date of birth, or your customer ID, as the password — check the email that came with the PDF. For Aadhaar, see <a href=\"aadhaar-pdf-password-open-remove.html\">the Aadhaar PDF password format</a>.</p>")],
+           ("Common passwords for statements", "<p>Banks and services often use a mix of your name and date of birth, or your customer ID, as the password — check the email that came with the PDF.</p>")],
  faq=[("Why is Print greyed out in my PDF?", "The PDF has a permissions restriction that blocks printing."),
       ("Can it crack an unknown password?", "No. You need the password to open the file; Unpass removes the protection after that."),
       ("Is my statement uploaded?", "No. Unlocking happens entirely in your browser.")]),
@@ -224,7 +224,7 @@ dict(
  title="How to Make a PDF Under 200 KB for Online Forms",
  desc="Government, college and scholarship portals often need PDFs under 200 KB. Here is how to create and compress your documents to fit — free and private.",
  tool="compress-pdf.html", toolname="Compress PDF",
- intro="'File size should not exceed 200 KB' is one of the most common upload errors on Indian government, university and scholarship portals. A phone photo alone can be 3–5 MB, so you need to shrink it.",
+ intro="'File size should not exceed 200 KB' is one of the most common upload errors on government, university and job portals. A phone photo alone can be 3–5 MB, so you need to shrink it.",
  steps=[("Make the PDF", "Photograph the document and convert it with Image to PDF (A4)"),
         ("Open Compress PDF", "Select the file"),
         ("Choose strong compression", "Scanned documents need a stronger level to reach 200 KB"),
@@ -290,3 +290,7 @@ dict(
       ("Can I protect a PDF on my phone?", "Yes, it works in Chrome and Safari on Android and iPhone."),
       ("Will the PDF look different?", "No. Only a password is added; every page stays the same.")]),
 ]
+
+
+from posts_data7 import POSTS7
+POSTS += POSTS7

@@ -4,6 +4,7 @@ import sys, html, re
 sys.path.insert(0, "_build")
 from unp import *
 from posts_data import POSTS, DATE
+from international import HIDDEN  # India-only pages: online but never linked
 
 esc = html.escape
 by_tool = {}
@@ -16,7 +17,7 @@ existing = re.findall(r'<a class="blogcard" href="([^"]+)"><h3>(.*?)</h3>', blog
 
 
 def related(p):
-    out = [q for q in by_tool[p["tool"]] if q is not p][:2]
+    out = [q for q in by_tool[p["tool"]] if q is not p and q["slug"] + ".html" not in HIDDEN][:2]
     rel = [(q["slug"] + ".html", esc(q["title"])) for q in out]
     for href, t in existing:  # fill with older guides that mention the same tool
         if len(rel) >= 3:
@@ -26,13 +27,14 @@ def related(p):
         except OSError:
             continue
         art = txt[txt.find("<article"): txt.find("</article>")]
-        if href != p["slug"] + ".html" and f'href="{p["tool"]}"' in art and href not in [r[0] for r in rel]:
+        if href not in HIDDEN and href != p["slug"] + ".html" and f'href="{p["tool"]}"' in art and href not in [r[0] for r in rel]:
             rel.append((href, t))
     return '<div class="related"><h2>Related guides</h2><div class="rellist">' + "".join(
         f'<a class="relcard" href="{h}"><span>{t}</span></a>' for h, t in rel) + "</div></div>"
 
 
 def build(p):
+    DATE = p.get("date", globals()["DATE"])
     f = p["slug"] + ".html"
     url = f"{DOMAIN}/{f}"
     h1 = re.sub(r"\s*\(.*?\)\s*$", "", p["title"]) if len(p["title"]) > 60 else p["title"]
@@ -65,12 +67,13 @@ def build(p):
 
 
 files = [build(p) for p in POSTS]
+sitemap_files = [f for f in files if f not in HIDDEN]
 
 # newest posts at the top of blog.html
 cards = "".join(
     f'<a class="blogcard" href="{p["slug"]}.html"><h3>{esc(p["title"])}</h3><p>{esc(p["desc"])}</p><span class="readmore">Read guide →</span></a>'
-    for p in POSTS if f'href="{p["slug"]}.html"' not in blog)
+    for p in POSTS if f'href="{p["slug"]}.html"' not in blog and p["slug"] + ".html" not in HIDDEN)
 blog = blog.replace('<div class="bloglist">', '<div class="bloglist">' + cards, 1)
 open("blog.html", "w", encoding="utf-8").write(blog)
-add_to_sitemap(files)
+add_to_sitemap(sitemap_files)
 print(len(files), "posts")

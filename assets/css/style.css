@@ -253,3 +253,24 @@ footer.site .legal{border-top:1px solid rgba(255,255,255,.12);padding:16px 0;fon
 .sizerow{display:flex;align-items:center;gap:12px;margin-top:12px;font-weight:700;font-size:14px}
 .sizerow input{flex:1;accent-color:var(--teal)}
 .btn svg{width:18px;height:18px;flex:none}
+/* Privacy guarantee */
+.guarantee{display:flex;gap:22px;align-items:flex-start;background:linear-gradient(135deg,#0E9F8E,#0B6E63);color:#fff;border-radius:22px;padding:26px;margin-top:6px;margin-bottom:30px;max-width:1100px}
+.guarantee .gbadge{flex:none;width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.16);display:grid;place-items:center}
+.guarantee .gbadge svg{width:36px;height:36px}
+.guarantee h2{margin:0 0 6px;font-size:24px;color:#fff}
+.guarantee p{margin:0 0 14px;color:rgba(255,255,255,.92);line-height:1.5}
+.glist{list-style:none;padding:0;margin:0 0 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+.glist li{display:flex;gap:10px;align-items:flex-start}
+.glist b{display:block;font-size:15px}
+.glist small{color:rgba(255,255,255,.85);font-size:13px;line-height:1.4}
+.gck{flex:none;width:24px;height:24px;border-radius:50%;background:#FFD54A;color:#14211F;display:grid;place-items:center;margin-top:1px}
+.gck svg{width:14px;height:14px}
+.glink{color:#fff;font-weight:700;text-decoration:underline}
+@media(max-width:640px){.guarantee{flex-direction:column;padding:20px;gap:12px;margin-left:16px;margin-right:16px}.glist{grid-template-columns:1fr}}
+.gbox{background:#e7f6f3;border:2px solid #0E9F8E;border-radius:16px;padding:18px 20px;margin:16px 0 24px}
+.privacy b{color:var(--ink)}
+.privacy a{color:var(--teal-d);font-weight:700}
+.privacy span{text-align:center}
+.hero .herocta{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px 14px;margin:22px auto 0;padding:0 16px;text-align:center}
+.privacy svg{flex:none}
+#guarantee{scroll-margin-top:80px}
